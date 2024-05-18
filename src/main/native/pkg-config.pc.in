@@ -1,0 +1,9 @@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@/spiApi
+
+Name: libspiApi
+Description: Raspberry Pi SPIapi Library
+Version: @VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_MICRO@
+Requires:
+Libs: -L${libdir} -lspiApi
+Cflags: -I${includedir}

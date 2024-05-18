@@ -116,9 +116,9 @@
                     <include>LICENSE.txt</include>
                     <include>NOTICE.txt</include>
                     <include>README.md</include>
-                    <include>lib/armhf/pi4j-ws281xled/libpi4j-ws281xled.so
+                    <include>lib/armhf/pi4j-SPIapi/libpi4j-SPIapi.so
                     </include> <!-- include the native 32-bit JNI library as a resource -->
-                    <include>lib/aarch64/pi4j-ws281xled/libpi4j-ws281xled.so
+                    <include>lib/aarch64/pi4j-SPIapi/libpi4j-SPIapi.so
                     </include> <!-- include the native 64-bit JNI library as a resource -->
                 </includes>
             </resource>
@@ -170,28 +170,20 @@
                                 <taskdef resource="net/sf/antcontrib/antcontrib.properties"
                                          classpathref="lib.path"/>
                                 <echo message=" ${line.separator}Prepare to copy .so to target/lib ${line.separator}"/>
-                                <mkdir dir="${project.build.directory}/lib/aarch64/pi4j-ws281xled/"/>
-                                <mkdir dir="${project.build.directory}/lib/armhf/pi4j-ws281xled/"/>
-
-
+                                <mkdir dir="${project.build.directory}/lib/aarch64/pi4j-SPIapi/"/>
+                                <mkdir dir="${project.build.directory}/lib/armhf/pi4j-SPIapi/"/>
                                 <echo message=" ${pi.arch}   : test this value ${line.separator}"/>
-                                <if>
-                                <equals arg1="${pi.arch}" arg2="armhf" />
-                                <then>
-                                <echo message=" tested as armhf {line.separator}"/>
+                                  <echo message=" tested as armhf {line.separator}"/>
                                     <!-- OS is armhf -->
-                                    <copy todir="${project.build.directory}/lib/armhf/pi4j-ws281xled/">
-                                        <fileset dir="${basedir}/src/main/native" includes="*.so"/>
+                                    <copy todir="${project.build.directory}/lib/armhf/pi4j-SPIapi/">
+                                        <fileset dir="${basedir}/src/main/native/lib/armhf/pi4j-SPIapi" includes="*.so"/>
                                     </copy>
-                                </then>
-                                <else>
-                                    <echo message=" tested as aarch64 ${line.separator}"/>
+                                   <echo message=" tested as aarch64 ${line.separator}"/>
                                     <!-- OS is aarch64 -->
-                                    <copy todir="${project.build.directory}/lib/aarch64/pi4j-ws281xled/">
-                                        <fileset dir="${basedir}/src/main/native" includes="*.so"/>
+                                    <copy todir="${project.build.directory}/lib/aarch64/pi4j-SPIapi/">
+                                        <fileset dir="${basedir}/src/main/native/lib/aarch64/pi4j-SPIapi" includes="*.so"/>
                                     </copy>
-                                </else>
-                                </if>
+
                             </target>
                         </configuration>
                      </execution>
@@ -205,7 +197,7 @@
                 </dependencies>
             </plugin>
             <!-- ENFORCE THAT THE NATIVE JNI SO FILES EXISTS TO BE INCLUDED IN FINAL JAR           -->
-            <!-- (The "lippi4j-ws281xled.so" JNI library is embedded as a resource in the JAR file.) -->
+            <!-- (The "lippi4j-SPIapi.so" JNI library is embedded as a resource in the JAR file.) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -220,13 +212,13 @@
                             <rules>
                                 <requireFilesExist>
                                     <files>
-                                        <!-- include 32-bit (ARMHF) Pi4J ws281xled JNI Library  -->
+                                        <!-- include 32-bit (ARMHF) Pi4J SPIapi JNI Library  -->
                                         <file>
-                                            ${project.build.directory}/lib/armhf/pi4j-ws281xled/libpi4j-ws281xled.so
+                                            ${project.build.directory}/lib/armhf/pi4j-SPIapi/libpi4j-SPIapi.so
                                         </file>
-                                        <!-- include 64-bit (AARCH64) Pi4J ws281xled JNI Library  -->
+                                        <!-- include 64-bit (AARCH64) Pi4J SPIapi JNI Library  -->
                                         <file>
-                                            ${project.build.directory}/lib/aarch64/pi4j-ws281xled/libpi4j-ws281xled.so
+                                            ${project.build.directory}/lib/aarch64/pi4j-SPIapi/libpi4j-SPIapi.so
                                         </file>
                                     </files>
                                 </requireFilesExist>
@@ -296,107 +288,4 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <!--              -->
-            <!--              -->
-            <!-- COPY .so file to targets directory structure          -->
-            <!--              -->
-            <!--              -->
-            <properties>
-                <pi.arch>aarch64</pi.arch>
-            </properties>
-            <id>aarch64</id>
-            <activation>
-                <activeByDefault> true</activeByDefault>
-                <os>
-                    <name>aarch64</name>
-                    <family>ARM</family>
-                    <arch>aarch64</arch>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <mkdir dir="${project.build.directory}/lib/aarch64/pi4j-ws281xled/"/>
-                                        <echo message=" ${line.separator}JNA Profile  ${line.separator}"/>
-                                        <echo message="Profile aarch64 ${line.separator}"/>
-                                        <echo message="pi.arch ${pi.arch}"/>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.apache.ant</groupId>
-                                <artifactId>ant-nodeps</artifactId>
-                                <version>1.8.1</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <!--              -->
-            <!--              -->
-            <!-- COPY .so file to targets directory structure          -->
-            <!--              -->
-            <!--              -->
-            <properties>
-                <pi.arch>armhf</pi.arch>
-            </properties>
-            <id>armhf</id>
-            <activation>
-                <os>
-                    <name>armhf</name>
-                    <family>ARM</family>
-                    <arch>armhf</arch>
-                </os>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>3.0.0</version>
-
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <mkdir dir="${project.build.directory}/lib/armhf/pi4j-ws281xled/"/>
-                                        <echo message=" ${line.separator}JNA Profile  ${line.separator}"/>
-                                        <echo message="Profile armhf ${line.separator}"/>
-                                   </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.apache.ant</groupId>
-                                <artifactId>ant-nodeps</artifactId>
-                                <version>1.8.1</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
