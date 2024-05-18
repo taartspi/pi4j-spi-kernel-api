@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.pi4j</groupId>
+    <artifactId>pi4j-JNA-SPI-KERNEL_API</artifactId>
+    <name>Pi4J :: JNA-SPI :: SPI access via kernel APIs</name>
+    <description>Pi4J SPI access via kernel APIs</description>
+    <version>0.0.1</version>
+
+    <properties>
+        <!-- PROJECT ENCODING PROPERTIES -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jna.version>5.6.0</jna.version>
+        <!-- JAVA COMPILER VERSIONS -->
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+
+        <!-- CPU architecture/OS determines which .so we have -->
+        <pi.arch>aarch64</pi.arch>
+        <!-- DEPENDENCIES VERSIONS -->
+        <slf4j.version>2.0.3</slf4j.version>
+        <pi4j.version>2.6.0-SNAPSHOT</pi4j.version>
+
+        <!-- BUILD PLUGIN VERSIONS -->
+        <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-antrun-plugin.version>1.8.1</maven-antrun-plugin.version>
+    </properties>
+
+    <!-- DEPENDENCY REPOSITORIES -->
+    <!-- To be removed after initial release of Pi4J V2 -->
+    <repositories>
+        <repository>
+            <id>oss-snapshots-repo</id>
+            <name>Sonatype OSS Maven Repository</name>
+            <url>https://oss.sonatype.org/content/groups/public</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>${jna.version}</version>
+        </dependency>
+        <dependency> <!-- JNA dependency -->
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>${jna.version}</version>
+        </dependency>
+        <!-- include Pi4J Plugins (Platforms and I/O Providers) -->
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-core</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-raspberrypi</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-pigpio</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-mock</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-linuxfs</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant-nodeps</artifactId>
+            <version>1.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>ant-contrib</groupId>
+            <artifactId>ant-contrib</artifactId>
+            <version>20020829</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- RESOURCES TO INCLUDE IN FINAL JAR PACKAGE -->
+        <resources>
+            <resource>
+                <directory>${project.build.directory}</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>LICENSE.txt</include>
+                    <include>NOTICE.txt</include>
+                    <include>README.md</include>
+                    <include>lib/armhf/pi4j-ws281xled/libpi4j-ws281xled.so
+                    </include> <!-- include the native 32-bit JNI library as a resource -->
+                    <include>lib/aarch64/pi4j-ws281xled/libpi4j-ws281xled.so
+                    </include> <!-- include the native 64-bit JNI library as a resource -->
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+
+            <resource>
+                <directory>${project.build.directory}</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>LICENSE.txt</include>
+                    <include>NOTICE.txt</include>
+                    <include>README.md</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/**</include>
+                </includes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <!--              -->
+            <!--              -->
+            <!-- COPY .so file to targets directory structure          -->
+            <!--              -->
+            <!--              -->
+            <plugin>
+                <!--groupId>org.apache.maven.plugins</groupId-->
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>transfer-compiled-pi4j-jar</id>
+                        <phase>prepare-package</phase>
+                        <!--phase>process-sources</phase-->
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target  name="pi4j-copy JNA so file">
+                                <path id="lib.path">
+                                    <fileset dir="${basedir}/target/distribution/" includes="ant-contrib-20020829.jar"/>
+                                </path>
+                                <taskdef resource="net/sf/antcontrib/antcontrib.properties"
+                                         classpathref="lib.path"/>
+                                <echo message=" ${line.separator}Prepare to copy .so to target/lib ${line.separator}"/>
+                                <mkdir dir="${project.build.directory}/lib/aarch64/pi4j-ws281xled/"/>
+                                <mkdir dir="${project.build.directory}/lib/armhf/pi4j-ws281xled/"/>
+
+
+                                <echo message=" ${pi.arch}   : test this value ${line.separator}"/>
+                                <if>
+                                <equals arg1="${pi.arch}" arg2="armhf" />
+                                <then>
+                                <echo message=" tested as armhf {line.separator}"/>
+                                    <!-- OS is armhf -->
+                                    <copy todir="${project.build.directory}/lib/armhf/pi4j-ws281xled/">
+                                        <fileset dir="${basedir}/src/main/native" includes="*.so"/>
+                                    </copy>
+                                </then>
+                                <else>
+                                    <echo message=" tested as aarch64 ${line.separator}"/>
+                                    <!-- OS is aarch64 -->
+                                    <copy todir="${project.build.directory}/lib/aarch64/pi4j-ws281xled/">
+                                        <fileset dir="${basedir}/src/main/native" includes="*.so"/>
+                                    </copy>
+                                </else>
+                                </if>
+                            </target>
+                        </configuration>
+                     </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-nodeps</artifactId>
+                        <version>1.8.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <!-- ENFORCE THAT THE NATIVE JNI SO FILES EXISTS TO BE INCLUDED IN FINAL JAR           -->
+            <!-- (The "lippi4j-ws281xled.so" JNI library is embedded as a resource in the JAR file.) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-native-jni-file--exist</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <rules>
+                                <requireFilesExist>
+                                    <files>
+                                        <!-- include 32-bit (ARMHF) Pi4J ws281xled JNI Library  -->
+                                        <file>
+                                            ${project.build.directory}/lib/armhf/pi4j-ws281xled/libpi4j-ws281xled.so
+                                        </file>
+                                        <!-- include 64-bit (AARCH64) Pi4J ws281xled JNI Library  -->
+                                        <file>
+                                            ${project.build.directory}/lib/aarch64/pi4j-ws281xled/libpi4j-ws281xled.so
+                                        </file>
+                                    </files>
+                                </requireFilesExist>
+                            </rules>
+                            <fail>false</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- JAVA COMPILER -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <release>${java.version}</release>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <verbose>false</verbose>
+                </configuration>
+            </plugin>
+
+            <!-- DEFAULT JAR EXECUTABLE CLASS -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>--module-path</argument>
+                        <argument>${project.build.directory}/distribution</argument>
+                        <argument>--module</argument>
+                        <argument>com.pi4j.example/com.pi4j.example.MinimalExample</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+
+            <!-- DOWNLOAD RUNTIME DEPENDENCIES -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/distribution</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                            <excludeTransitive>false</excludeTransitive>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <!--              -->
+            <!--              -->
+            <!-- COPY .so file to targets directory structure          -->
+            <!--              -->
+            <!--              -->
+            <properties>
+                <pi.arch>aarch64</pi.arch>
+            </properties>
+            <id>aarch64</id>
+            <activation>
+                <activeByDefault> true</activeByDefault>
+                <os>
+                    <name>aarch64</name>
+                    <family>ARM</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.build.directory}/lib/aarch64/pi4j-ws281xled/"/>
+                                        <echo message=" ${line.separator}JNA Profile  ${line.separator}"/>
+                                        <echo message="Profile aarch64 ${line.separator}"/>
+                                        <echo message="pi.arch ${pi.arch}"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant-nodeps</artifactId>
+                                <version>1.8.1</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!--              -->
+            <!--              -->
+            <!-- COPY .so file to targets directory structure          -->
+            <!--              -->
+            <!--              -->
+            <properties>
+                <pi.arch>armhf</pi.arch>
+            </properties>
+            <id>armhf</id>
+            <activation>
+                <os>
+                    <name>armhf</name>
+                    <family>ARM</family>
+                    <arch>armhf</arch>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.0.0</version>
+
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.build.directory}/lib/armhf/pi4j-ws281xled/"/>
+                                        <echo message=" ${line.separator}JNA Profile  ${line.separator}"/>
+                                        <echo message="Profile armhf ${line.separator}"/>
+                                   </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant-nodeps</artifactId>
+                                <version>1.8.1</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
