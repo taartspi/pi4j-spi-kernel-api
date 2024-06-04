@@ -21,26 +21,15 @@ set(TEST_TARGET test)
 
 set(LIB_PUBLIC_HEADERS
     spiApi.h
-    rpihw.h
-    pwm.h
-    clk.h
-    dma.h
-    gpio.h
-    mailbox.h
-    pcm.h
-)
+   )
 
 set(LIB_SOURCES
-    mailbox.c
     spiApi.c
-    pwm.c
-    pcm.c
-    dma.c
-    rpihw.c
+  #  main.c
 )
 
 set(TEST_SOURCES
-    main.c
+  #  main.c
 )
 
 include(GNUInstallDirs)

@@ -1,0 +1,9 @@
+libdir=/usr/local/lib
+includedir=/usr/local/include/spiApi
+
+Name: libspiApi
+Description: Raspberry Pi SPIapi Library
+Version: 1.1.0
+Requires:
+Libs: -L${libdir} -lspiApi
+Cflags: -I${includedir}

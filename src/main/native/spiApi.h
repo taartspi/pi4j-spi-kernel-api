@@ -37,9 +37,6 @@ extern "C" {
 
 #include <stdint.h>
 
-#include "rpihw.h"
-#include "pwm.h"
-
 
 #define spiApi_TARGET_FREQ                       800000   // Can go as low as 400000
 
@@ -65,13 +62,6 @@ extern "C" {
 #define SK6812_STRIP                             spiApi_STRIP_GRB
 #define SK6812W_STRIP                            SK6812_STRIP_GRBW
 
-struct spiApi_device;
-
-
-
- typedef struct spiApi_test  {
-        long waldo;
-    }spiApi_test_t;
 
 
 
@@ -91,15 +81,31 @@ typedef struct spiApi_channel_t
     uint8_t *gamma;                              //< Gamma correction table
 } spiApi_channel_t;
 
-typedef struct spiApi_t
+
+
+
+typedef struct spiApi_test  {
+        int waldo;
+        int where;
+ }spiApi_test_t;
+
+
+typedef struct spiApi_device
 {
-    uint64_t render_wait_time;                   //< time in µs before the next render can run
+    int driver_mode;
+    int spi_fd;
+} spiApi_device_t;
+
+
+typedef struct spiApi
+{
+    uint8_t max_freq;
     struct spiApi_device *device;                //< Private data for driver use
-    const rpi_hw_t *rpi_hw;                      //< RPI Hardware Information
-    uint32_t freq;                               //< Required output frequency
-    int dmanum;                                  //< DMA number _not_ already in use
-    spiApi_channel_t channel[RPI_PWM_CHANNELS];
-} spiApi_t;
+ } spiApi_t;
+
+
+
+
 
 #define spiApi_RETURN_STATES(X)                                                             \
             X(0, spiApi_SUCCESS, "Success"),                                                \

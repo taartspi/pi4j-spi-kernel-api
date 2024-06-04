@@ -44,10 +44,7 @@ static char VERSION[] = "XX.YY.ZZ";
 #include <getopt.h>
 
 
-#include "clk.h"
-#include "gpio.h"
-#include "dma.h"
-#include "pwm.h"
+
 #include "version.h"
 
 #include "spiApi.h"
@@ -57,7 +54,7 @@ static char VERSION[] = "XX.YY.ZZ";
 
 // defaults for cmdline options
 #define TARGET_FREQ             spiApi_TARGET_FREQ
-#define GPIO_PIN                18
+#define GPIO_PIN                10
 #define DMA                     10
 //#define STRIP_TYPE            spiApi_STRIP_RGB		// WS2812/SK6812RGB integrated chip+leds
 #define STRIP_TYPE              spiApi_STRIP_GBR		// WS2812/SK6812RGB integrated chip+leds
