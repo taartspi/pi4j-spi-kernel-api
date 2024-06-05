@@ -41,9 +41,21 @@ public class SPIapiImpl  implements SPIapiIntrf {
         return ret;
     }
 
+
+
+
+
     @Override
     public SPIapi.spiApi_return_t spiApi_render(SPIapi.spiApi_t spiApi) {
         return null;
+    }
+
+    @Override
+    public SPIapi.spiApi_return_t spiApi_init(SPIapi.spiApi_t spiApi) {
+        SPIapi.spiApi_return_t  ret =  null;
+        ret = this.functionsNative.spiApi_init(spiApi);
+
+        return ret;
     }
 
 

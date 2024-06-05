@@ -36,10 +36,16 @@ public class SPIapiFuncsNative implements SPIapiIntrf{
         return jna_rc.x0;
     }
 
+    @Override
     public SPIapi.spiApi_return_t spiApi_render(final SPIapi.spiApi_t spiApi) {
         return functionsNative.spiApi_render(spiApi);
     }
 
+
+    @Override
+    public SPIapi.spiApi_return_t spiApi_init(SPIapi.spiApi_t spiApi){
+        return functionsNative.spiApi_init(spiApi);
+    }
 
 
 

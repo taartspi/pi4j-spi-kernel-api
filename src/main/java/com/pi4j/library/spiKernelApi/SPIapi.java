@@ -23,15 +23,16 @@ public class SPIapi {
 
     public final int RPI_PWM_CHANNELS = 2;
 
-
+    @FieldOrder({"returnEnumGood","returnEnumFail"})
     public static class spiApi_return_t extends Structure {
         public int returnEnumGood = 0;
         public int returnEnumFail = -1;
     }
 
-    @FieldOrder({"waldo"})
+    @FieldOrder({"waldo","where"})
     public static class spiApi_test extends Structure {
         public int waldo;
+        public int where;
     }
 
     /*typedef struct spiApi_t
@@ -44,16 +45,44 @@ public class SPIapi {
     spiApi_channel_t channel[RPI_PWM_CHANNELS];
 } spiApi_t;(/
 
+
+public static class Example10Struct extends Structure {
+		public static class ByReference extends Example10Struct implements Structure.ByReference {}
+
+		public int numVals;
+		public Pointer vals; // double*
+	}
+	...
  */
-    @FieldOrder({"render_wait_time","device","rpi_hw","freq","dnanum","channel"})
-    public static class spiApi_t extends Structure {
-        public long render_wait_time;
-        public spiApi_device_p device; // todo *
-        public rpi_hw_t rpi_hw;   // todo *
-        public int freq;
-        public int dnanum;
-        public spiApi_channel_t channel[]; //  TODO allocate ??? RPI_PWM_CHANNELS];
+    @FieldOrder({"max_freq", "dev"})
+    public static class spiApi_t extends Structure{
+         public byte max_freq;
+            public spiApi_device_p.ByReference dev;
+        public spiApi_t() {
+            super();
+        }
     }
+
+    @FieldOrder({"driver_mode","spi_FD"})
+    public static class spiApi_device_p extends  Structure {
+             public int driver_mode;
+             public int spi_FD;
+
+        public spiApi_device_p(Pointer peer) {
+            super(peer);
+        }
+        public spiApi_device_p() {
+            super();
+        }
+//ALIGN_NONE
+        public static class ByReference extends spiApi_device_p implements Structure.ByReference {
+
+        };
+
+        public static class ByValue extends spiApi_device_p implements Structure.ByValue {
+        };
+    }
+
 
     /*
     typedef struct {
@@ -68,7 +97,7 @@ public class SPIapi {
     char *desc;
 } rpi_hw_t;
      */
-    @FieldOrder({"type","hwver","periph_base","videocore_base","desc"})
+ /*   @FieldOrder({"type","hwver","periph_base","videocore_base","desc"})
     public static class rpi_hw_t extends Structure {
         public int type;
         public int hwver;
@@ -76,7 +105,7 @@ public class SPIapi {
         public int videocore_base;
         public String desc;
     };
-
+*/
 
 
 
@@ -131,22 +160,18 @@ public class SPIapi {
 
 
     // pointer
-    @FieldOrder({"p"})
-    public static class spiApi_device_p extends Structure{
-        public Pointer p;
+    @FieldOrder({"spi_mode","spi_FD"})
+    public static class spiApi_device_p_old extends Structure{
+        public int spi_mode;
+        public int spi_FD;
+      //  public Pointer p;
 
-/*            public spiApi_device_p(Pointer p) {
-                // cannot use super(p) because of fixed-size array fields
-                super();
-                useMemory(p); // set pointer
-                read(); // initialize fields
-            }*/
 
-            public spiApi_device_p() {
+          /*  public spiApi_device_p() {
                 super();
                 // handle fixed-size array fields correctly
                 ensureAllocated();
-            }
+            }*/
     }
 
 

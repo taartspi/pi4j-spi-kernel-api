@@ -27,6 +27,10 @@ public interface SPIapiIntrf extends Library {
 
     SPIapi.spiApi_return_t spiApi_render(SPIapi.spiApi_t spiApi);  // TODO *
 
+
+    SPIapi.spiApi_return_t spiApi_init(SPIapi.spiApi_t spiApi);
+
+
     public static SPIapiImpl newNativeInstance(String soName, String libName) throws java.io.IOException {
         SPIapiImpl rval = new SPIapiImpl(soName);
         rval.initialize(soName, libName);

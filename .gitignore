@@ -53,8 +53,11 @@ newtest
 *.o
 *.a
 *.swp
+*.log
 
 build/
 release/
 debug/
 settings.json
+CMakeFiles/
+*.bu

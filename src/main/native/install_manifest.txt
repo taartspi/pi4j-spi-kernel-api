@@ -1,0 +1,3 @@
+/usr/local/lib/libspiApi.a
+/usr/local/include/spiApi/spiApi.h
+/usr/local/lib/pkgconfig/libspiApi.pc
