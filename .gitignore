@@ -48,7 +48,7 @@ Thumbs.db
 .sconsign.dblite
 version.h
 *.pyc
-test
+#test
 newtest
 *.o
 *.a
